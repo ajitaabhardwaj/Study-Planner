@@ -714,7 +714,7 @@ function PrepView({
 
       <div className="plan-board">
         {prepPlan.length === 0 ? (
-          <EmptyState title="No generated plan yet" text="Add topics with level and hours, then build the plan." />
+          <EmptyState title="No generated plan yet" text="Add topics with level, duration, and unit, then build the plan." />
         ) : (
           prepPlan.map((day) => {
             const used = day.items.reduce((sum, item) => sum + item.minutes, 0);
@@ -784,8 +784,8 @@ function TodoForm({ todoForm, setTodoForm, addTodo }) {
           Plan duration
           <input
             type="number"
-            min="0.1"
-            step={todoForm.durationUnit === "minutes" ? "1" : "0.25"}
+            min="1"
+            step="1"
             value={todoForm.plannedHours}
             onChange={(e) => setTodoForm({ ...todoForm, plannedHours: e.target.value })}
           />

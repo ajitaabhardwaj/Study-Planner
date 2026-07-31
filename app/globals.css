@@ -569,7 +569,7 @@ select:focus {
 
 .topic-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 92px 86px 104px 42px;
+  grid-template-columns: 92px 86px 104px 42px;
   gap: 8px;
   align-items: center;
 }
@@ -577,6 +577,14 @@ select:focus {
 .topic-row > input,
 .topic-row > select {
   min-width: 0;
+}
+
+.topic-row > :first-child {
+  grid-column: 1 / -1;
+}
+
+.topic-row-head > :first-child {
+  grid-column: 1 / -1;
 }
 
 .topic-row .icon-button {
@@ -903,10 +911,10 @@ select:focus {
   }
 
   .topic-row {
-    grid-template-columns: minmax(0, 1fr) 1fr 1fr 42px;
+    grid-template-columns: 1fr 1fr 42px;
   }
 
-  .topic-row input:first-child {
+  .topic-row > :first-child {
     grid-column: 1 / -1;
   }
 
