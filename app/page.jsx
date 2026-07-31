@@ -523,8 +523,7 @@ function TodayView(props) {
 
   return (
     <section className="today-command-grid">
-      <div className="todo-left-stack">
-        <div className="panel form-panel todo-command-panel">
+      <div className="panel form-panel todo-command-panel">
           <div className="panel-title">
             <ClipboardList size={20} />
             <h2>Write all your to-dos</h2>
@@ -543,17 +542,16 @@ function TodayView(props) {
             setTodoForm={setTodoForm}
             addTodo={addTodo}
           />
-        </div>
+      </div>
 
-        <div className="panel todo-list-panel">
-          <TodoGroups
-            todos={todos}
-            selectedDate={selectedDate}
-            updateTodo={updateTodo}
-            deleteTodo={deleteTodo}
-            todoToTask={todoToTask}
-          />
-        </div>
+      <div className="panel todo-list-panel">
+        <TodoGroups
+          todos={todos}
+          selectedDate={selectedDate}
+          updateTodo={updateTodo}
+          deleteTodo={deleteTodo}
+          todoToTask={todoToTask}
+        />
       </div>
 
       <div className="main-column">

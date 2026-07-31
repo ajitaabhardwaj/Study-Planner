@@ -161,14 +161,9 @@ h3 {
 
 .today-command-grid {
   display: grid;
-  grid-template-columns: minmax(320px, 430px) minmax(0, 1fr);
+  grid-template-columns: minmax(300px, 380px) minmax(300px, 390px) minmax(420px, 1fr);
   gap: 18px;
   align-items: start;
-}
-
-.todo-left-stack {
-  display: grid;
-  gap: 18px;
 }
 
 .panel,
@@ -844,6 +839,16 @@ select:focus {
 
 .empty-state h3 {
   margin-bottom: 8px;
+}
+
+@media (max-width: 1180px) {
+  .today-command-grid {
+    grid-template-columns: minmax(300px, 390px) minmax(0, 1fr);
+  }
+
+  .main-column {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 880px) {
