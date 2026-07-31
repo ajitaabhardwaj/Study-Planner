@@ -154,7 +154,7 @@ h3 {
 
 .workspace-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 350px) minmax(0, 1fr);
+  grid-template-columns: minmax(360px, 440px) minmax(0, 1fr);
   gap: 18px;
   align-items: start;
 }
@@ -569,9 +569,14 @@ select:focus {
 
 .topic-row {
   display: grid;
-  grid-template-columns: minmax(140px, 1.4fr) minmax(92px, 0.8fr) minmax(82px, 0.65fr) auto;
+  grid-template-columns: minmax(0, 1fr) 92px 86px 104px 42px;
   gap: 8px;
   align-items: center;
+}
+
+.topic-row > input,
+.topic-row > select {
+  min-width: 0;
 }
 
 .topic-row .icon-button {
@@ -591,7 +596,7 @@ select:focus {
 
 .topic-row-head {
   color: #ea9dff;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 900;
 }
 
@@ -898,11 +903,15 @@ select:focus {
   }
 
   .topic-row {
-    grid-template-columns: 1fr 1fr auto;
+    grid-template-columns: minmax(0, 1fr) 1fr 1fr 42px;
   }
 
   .topic-row input:first-child {
     grid-column: 1 / -1;
+  }
+
+  .topic-row select[aria-label="Time unit"] {
+    grid-column: span 2;
   }
 
   .topic-row-head {

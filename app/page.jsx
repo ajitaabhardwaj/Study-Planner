@@ -33,7 +33,8 @@ const emptyPrepTopic = () => ({
   id: uid(),
   title: "",
   level: "medium",
-  hours: 1,
+  duration: 1,
+  durationUnit: "hours",
 });
 
 const starterState = {
@@ -305,20 +306,18 @@ export default function StudyPlanner() {
 
   function generatePrepPlan(event) {
     event.preventDefault();
-    const days = Math.max(1, Number(prepForm.days) || 1);
-    const hoursPerDay = Math.max(1, Number(prepForm.hoursPerDay) || 1);
+    const days = Math.max(1, Math.floor(Number(prepForm.days) || 1));
+    const hoursPerDay = Math.max(1, Math.floor(Number(prepForm.hoursPerDay) || 1));
     const dailyCapacity = hoursPerDay * 60;
     const topics = prepForm.topics
       .map((topic, index) => {
-        const allottedHours = Number(topic.hours);
+        const durationValue = Math.max(1, Math.floor(Number(topic.duration ?? topic.hours) || 1));
+        const durationUnit = topic.durationUnit || "hours";
         return {
           id: uid(),
           title: topic.title.trim(),
           level: topic.level,
-          minutes:
-            Number.isFinite(allottedHours) && allottedHours > 0
-              ? allottedHours * 60
-              : Math.max(30, Math.floor(dailyCapacity / 4)),
+          minutes: durationUnit === "minutes" ? durationValue : durationValue * 60,
           done: false,
           order: index,
         };
@@ -650,18 +649,19 @@ function PrepView({
           <div className="form-row">
             <label>
               Days
-              <input type="number" min="1" value={prepForm.days} onChange={(e) => setPrepForm({ ...prepForm, days: e.target.value })} />
+              <input type="number" min="1" step="1" value={prepForm.days} onChange={(e) => setPrepForm({ ...prepForm, days: e.target.value })} />
             </label>
             <label>
               Hours/day
-              <input type="number" min="1" step="0.5" value={prepForm.hoursPerDay} onChange={(e) => setPrepForm({ ...prepForm, hoursPerDay: e.target.value })} />
+              <input type="number" min="1" step="1" value={prepForm.hoursPerDay} onChange={(e) => setPrepForm({ ...prepForm, hoursPerDay: e.target.value })} />
             </label>
           </div>
           <div className="topic-rows" aria-label="Prep topics">
             <div className="topic-row topic-row-head">
               <span>Topic</span>
               <span>Level</span>
-              <span>Hours</span>
+              <span>Duration</span>
+              <span>Unit</span>
               <span />
             </div>
             {prepForm.topics.map((topic) => (
@@ -683,12 +683,20 @@ function PrepView({
                 </select>
                 <input
                   type="number"
-                  min="0.1"
-                  step="0.25"
-                  value={topic.hours}
-                  onChange={(e) => updateTopic(topic.id, { hours: e.target.value })}
-                  aria-label="Hours to allot"
+                  min="1"
+                  step="1"
+                  value={topic.duration ?? topic.hours ?? 1}
+                  onChange={(e) => updateTopic(topic.id, { duration: e.target.value })}
+                  aria-label="Time to allot"
                 />
+                <select
+                  value={topic.durationUnit || "hours"}
+                  onChange={(e) => updateTopic(topic.id, { durationUnit: e.target.value })}
+                  aria-label="Time unit"
+                >
+                  <option value="hours">Hours</option>
+                  <option value="minutes">Minutes</option>
+                </select>
                 <IconButton label="Remove" onClick={() => removeTopicRow(topic.id)} icon={Trash2} danger />
               </div>
             ))}

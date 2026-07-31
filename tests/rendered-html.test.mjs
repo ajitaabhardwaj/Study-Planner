@@ -84,7 +84,7 @@ test("source is domain-neutral and uses structured prep topics", async () => {
   assert.match(page, /selectedDateLabel/);
   assert.match(page, /updatePrepItemDone/);
   assert.match(page, /checked=\{Boolean\(item\.done\)\}/);
-  assert.match(page, /Hours to allot/);
+  assert.match(page, /Time to allot/);
   assert.doesNotMatch(page, /Time to allot in minutes/);
   assert.doesNotMatch(page, /label="To-Dos"/);
   assert.doesNotMatch(page, /Study AI|DSA|fullstack|System design|React hooks|Node APIs|SQL joins/i);
