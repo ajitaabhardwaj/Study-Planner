@@ -166,6 +166,10 @@ h3 {
   align-items: start;
 }
 
+.today-command-grid > * {
+  min-width: 0;
+}
+
 .panel,
 .stat-card,
 .task-card,
@@ -185,6 +189,7 @@ h3 {
 }
 
 .todo-list-panel {
+  overflow: hidden;
   padding: 18px;
 }
 
@@ -799,6 +804,7 @@ select:focus {
 
 .todo-card {
   align-items: center;
+  min-width: 0;
   padding: 12px;
   border-top: 1px solid var(--line);
   border-radius: 8px;
@@ -823,10 +829,14 @@ select:focus {
 .todo-card h4 {
   margin: 0 0 5px;
   color: var(--ink);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .todo-card > div:first-child {
+  flex: 1 1 auto;
   min-width: 0;
+  overflow: hidden;
 }
 
 .todo-actions {
@@ -884,12 +894,16 @@ select:focus {
 
 .todo-card p {
   margin-bottom: 7px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .todo-card span {
   color: #7a858b;
   font-size: 0.72rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .todo-card.complete h4,
