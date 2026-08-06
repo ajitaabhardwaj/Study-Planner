@@ -80,7 +80,7 @@ test("source is domain-neutral and uses structured prep topics", async () => {
   assert.doesNotMatch(page, /Apply, revise, submit, call, practice|Optional note or deadline context/);
   assert.match(page, /Revision/);
   assert.match(page, /part \$\{part\}/);
-  assert.match(page, /totalTopicMinutes < totalCapacity/);
+  assert.match(page, /day\.items\.length === 0/);
   assert.doesNotMatch(page, /TimerReset|RotateCcw|Use hours for 0\.5/);
   assert.match(page, /selectedDateLabel/);
   assert.match(page, /updatePrepItemDone/);

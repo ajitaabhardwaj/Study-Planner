@@ -409,17 +409,14 @@ export default function StudyPlanner() {
       }
     });
 
-    const totalTopicMinutes = topics.reduce((sum, topic) => sum + topic.minutes, 0);
-    const totalCapacity = days * dailyCapacity;
-    if (topics.length && totalTopicMinutes < totalCapacity) {
+    if (topics.length) {
       plan.forEach((day) => {
-        const remaining = dailyCapacity - usedForDay(day);
-        if (remaining > 0) {
+        if (day.items.length === 0) {
           day.items.push({
             id: uid(),
             title: "Revision",
             level: "revision",
-            minutes: remaining,
+            minutes: dailyCapacity,
             done: false,
             order: 999,
           });
