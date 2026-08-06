@@ -47,7 +47,7 @@ button {
 }
 
 .app-shell {
-  width: min(1180px, calc(100% - 32px));
+  width: min(1440px, calc(100% - 32px));
   margin: 0 auto;
   padding: 30px 0 48px;
 }
@@ -161,7 +161,7 @@ h3 {
 
 .today-command-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 360px) minmax(280px, 390px) minmax(360px, 1fr);
+  grid-template-columns: 360px minmax(0, 1fr) 420px;
   gap: 18px;
   align-items: start;
 }
@@ -189,8 +189,14 @@ h3 {
 }
 
 .todo-list-panel {
+  position: relative;
   overflow: hidden;
   padding: 18px;
+}
+
+.main-column {
+  position: relative;
+  min-width: 0;
 }
 
 .panel-title {
@@ -927,7 +933,7 @@ select:focus {
   margin-bottom: 8px;
 }
 
-@media (max-width: 1020px) {
+@media (max-width: 1260px) {
   .today-command-grid {
     grid-template-columns: minmax(300px, 390px) minmax(0, 1fr);
   }
