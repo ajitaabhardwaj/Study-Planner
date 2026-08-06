@@ -654,6 +654,37 @@ select:focus {
   font-weight: 800;
 }
 
+
+.prep-day-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 66px 88px auto;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.prep-day-add input,
+.prep-day-add select {
+  min-height: 34px;
+  padding: 7px 9px;
+  border-radius: 7px;
+  font-size: 0.76rem;
+}
+
+.prep-day-add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: rgba(234, 157, 255, 0.2);
+  color: #c026d3;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
 .prep-item {
   justify-content: space-between;
   width: 100%;
@@ -932,5 +963,13 @@ select:focus {
 
   .topic-row .icon-button {
     flex: 0 0 42px;
+  }
+
+  .prep-day-add {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .prep-day-add input:first-child {
+    grid-column: 1 / -1;
   }
 }

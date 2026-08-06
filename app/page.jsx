@@ -37,6 +37,13 @@ const emptyPrepTopic = () => ({
   durationUnit: "hours",
 });
 
+const emptyPrepDayItem = () => ({
+  title: "",
+  duration: 1,
+  durationUnit: "hours",
+  level: "medium",
+});
+
 const starterState = {
   tasks: [],
   todos: [],
@@ -407,6 +414,37 @@ export default function StudyPlanner() {
     }));
   }
 
+  function addPrepItemToDay(dayId, item) {
+    const durationValue = Math.max(1, Math.floor(Number(item.duration) || 1));
+    const minutes = item.durationUnit === "minutes" ? durationValue : durationValue * 60;
+    const title = item.title.trim();
+    if (!title) return false;
+
+    setState((current) => ({
+      ...current,
+      prepPlan: current.prepPlan.map((day) =>
+        day.id === dayId
+          ? {
+              ...day,
+              items: [
+                ...day.items,
+                {
+                  id: uid(),
+                  title,
+                  level: item.level || "medium",
+                  minutes,
+                  done: false,
+                  order: day.items.length,
+                  manual: true,
+                },
+              ],
+            }
+          : day,
+      ),
+    }));
+    return true;
+  }
+
   function prepItemToTask(item) {
     setState((current) => ({
       ...current,
@@ -487,6 +525,7 @@ export default function StudyPlanner() {
           prepPlan={state.prepPlan}
           prepItemToTask={prepItemToTask}
           updatePrepItemDone={updatePrepItemDone}
+          addPrepItemToDay={addPrepItemToDay}
         />
       )}
     </main>
@@ -613,7 +652,27 @@ function PrepView({
   prepPlan,
   prepItemToTask,
   updatePrepItemDone,
+  addPrepItemToDay,
 }) {
+  const [dayItemForms, setDayItemForms] = useState({});
+
+  function dayItemForm(dayId) {
+    return dayItemForms[dayId] || emptyPrepDayItem();
+  }
+
+  function updateDayItemForm(dayId, changes) {
+    setDayItemForms((current) => ({
+      ...current,
+      [dayId]: { ...(current[dayId] || emptyPrepDayItem()), ...changes },
+    }));
+  }
+
+  function submitDayItem(event, dayId) {
+    event.preventDefault();
+    const added = addPrepItemToDay(dayId, dayItemForm(dayId));
+    if (!added) return;
+    setDayItemForms((current) => ({ ...current, [dayId]: emptyPrepDayItem() }));
+  }
   function updateTopic(topicId, changes) {
     setPrepForm({
       ...prepForm,
@@ -725,6 +784,34 @@ function PrepView({
                   <h3>Day {day.day}</h3>
                   <span>{formatMinutes(used)} / {formatMinutes(day.capacity)} · {done}/{day.items.length} done</span>
                 </div>
+                <form className="prep-day-add" onSubmit={(event) => submitDayItem(event, day.id)}>
+                  <input
+                    value={dayItemForm(day.id).title}
+                    onChange={(event) => updateDayItemForm(day.id, { title: event.target.value })}
+                    placeholder="Add task"
+                    aria-label={`Add task to day ${day.day}`}
+                  />
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={dayItemForm(day.id).duration}
+                    onChange={(event) => updateDayItemForm(day.id, { duration: event.target.value })}
+                    aria-label={`Task duration for day ${day.day}`}
+                  />
+                  <select
+                    value={dayItemForm(day.id).durationUnit}
+                    onChange={(event) => updateDayItemForm(day.id, { durationUnit: event.target.value })}
+                    aria-label={`Task duration unit for day ${day.day}`}
+                  >
+                    <option value="hours">Hours</option>
+                    <option value="minutes">Minutes</option>
+                  </select>
+                  <button type="submit" className="prep-day-add-button">
+                    <Plus size={15} />
+                    <span>Add</span>
+                  </button>
+                </form>
                 <div className="prep-items">
                   {day.items.map((item) => (
                     <div className={`prep-item ${topicLevel(item)} ${item.done ? "done" : ""}`} key={item.id}>
