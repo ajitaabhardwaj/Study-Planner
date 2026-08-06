@@ -51,11 +51,34 @@ const starterState = {
   prepPlan: [],
 };
 
+const SPLIT_TITLE_PATTERN = /\s+-\s+(day\s+\d+\/\d+)$/i;
+
+function normalizePrepItem(item) {
+  const match = item.title?.match(SPLIT_TITLE_PATTERN);
+  if (!match) return item;
+  return {
+    ...item,
+    title: item.title.replace(SPLIT_TITLE_PATTERN, ""),
+    splitLabel: item.splitLabel || match[1],
+  };
+}
+
+function normalizeSavedState(saved) {
+  return {
+    ...starterState,
+    ...saved,
+    prepPlan: (saved.prepPlan || []).map((day) => ({
+      ...day,
+      items: (day.items || []).map(normalizePrepItem),
+    })),
+  };
+}
+
 function loadState() {
   if (typeof window === "undefined") return starterState;
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return saved ? { ...starterState, ...saved } : starterState;
+    return saved ? normalizeSavedState(saved) : starterState;
   } catch {
     return starterState;
   }
@@ -104,12 +127,12 @@ function prepItemMeta(item) {
 }
 
 function prepItemTitle(item) {
-  return item.title.replace(/\s+-\s+day\s+\d+\/\d+$/i, "");
+  return item.title.replace(SPLIT_TITLE_PATTERN, "");
 }
 
 function prepItemSplitLabel(item) {
   if (item.splitLabel) return item.splitLabel;
-  const match = item.title.match(/\s+-\s+(day\s+\d+\/\d+)$/i);
+  const match = item.title.match(SPLIT_TITLE_PATTERN);
   return match?.[1] || "";
 }
 
@@ -514,7 +537,7 @@ export default function StudyPlanner() {
       tasks: [
         {
           id: uid(),
-          title: item.title,
+          title: prepItemTitle(item),
           plannedMinutes: item.minutes,
           achievedSeconds: 0,
           activeStartedAt: null,

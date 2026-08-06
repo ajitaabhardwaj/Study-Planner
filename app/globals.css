@@ -753,6 +753,7 @@ select:focus {
   font-weight: 800;
   text-transform: lowercase;
   white-space: nowrap;
+  padding: 0 4px;
 }
 
 .prep-plan-button,

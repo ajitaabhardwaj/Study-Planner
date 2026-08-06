@@ -79,6 +79,8 @@ test("source is domain-neutral and uses structured prep topics", async () => {
   assert.match(page, /splitDays/);
   assert.match(page, /splitLabel/);
   assert.match(page, /prep-split-label/);
+  assert.match(page, /normalizeSavedState/);
+  assert.match(page, /SPLIT_TITLE_PATTERN/);
   assert.match(page, /sourceTodoId/);
   assert.match(page, /completeTimedTask/);
   assert.doesNotMatch(page, /Apply, revise, submit, call, practice|Optional note or deadline context/);
