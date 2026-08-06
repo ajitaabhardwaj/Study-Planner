@@ -103,6 +103,16 @@ function prepItemMeta(item) {
     : `${topicLevel(item)} level · ${formatHoursFromMinutes(item.minutes)}`;
 }
 
+function prepItemTitle(item) {
+  return item.title.replace(/\s+-\s+day\s+\d+\/\d+$/i, "");
+}
+
+function prepItemSplitLabel(item) {
+  if (item.splitLabel) return item.splitLabel;
+  const match = item.title.match(/\s+-\s+(day\s+\d+\/\d+)$/i);
+  return match?.[1] || "";
+}
+
 export default function StudyPlanner() {
   const [activeTab, setActiveTab] = useState("today");
   const [selectedDate, setSelectedDate] = useState(todayKey());
@@ -395,7 +405,8 @@ export default function StudyPlanner() {
           const splitItem = {
             ...topic,
             id: uid(),
-            title: `${topic.title} - day ${index + 1}/${requestedSplitDays}`,
+            title: topic.title,
+            splitLabel: `day ${index + 1}/${requestedSplitDays}`,
             minutes: chunkMinutes,
           };
 
@@ -890,10 +901,13 @@ function PrepView({
                           onChange={(e) => updatePrepItemDone(item.id, e.target.checked)}
                         />
                         <span>
-                          <strong>{item.title}</strong>
+                          <strong>{prepItemTitle(item)}</strong>
                           <small>{prepItemMeta(item)}</small>
                         </span>
                       </label>
+                      {prepItemSplitLabel(item) && (
+                        <span className="prep-split-label">{prepItemSplitLabel(item)}</span>
+                      )}
                       <div className="prep-item-actions">
                         <button className="prep-plan-button" type="button" onClick={() => prepItemToTask(item)} title="Add to today" aria-label="Add to today">
                           <ArrowRight size={17} />
