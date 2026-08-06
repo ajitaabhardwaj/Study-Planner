@@ -72,6 +72,8 @@ test("source is domain-neutral and uses structured prep topics", async () => {
   assert.match(page, /selectedDate/);
   assert.match(page, /Choose planner date/);
   assert.match(page, /plannedMinutes/);
+  assert.match(page, /taskElapsedSeconds/);
+  assert.match(page, /activeStartedAt/);
   assert.match(page, /dueTime/);
   assert.match(page, /durationUnit/);
   assert.match(page, /splitDays/);

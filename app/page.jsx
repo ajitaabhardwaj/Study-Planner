@@ -83,6 +83,12 @@ function formatSeconds(seconds) {
     : `${m}:${String(s).padStart(2, "0")}`;
 }
 
+function taskElapsedSeconds(task, now = Date.now()) {
+  const savedSeconds = Number(task.achievedSeconds || 0);
+  if (task.status !== "active" || !task.activeStartedAt) return savedSeconds;
+  return savedSeconds + Math.max(0, Math.floor((now - task.activeStartedAt) / 1000));
+}
+
 function priorityRank(priority) {
   return { high: 0, medium: 1, low: 2, revision: 3 }[priority] ?? 1;
 }
@@ -104,6 +110,7 @@ export default function StudyPlanner() {
   const [state, setState] = useState(starterState);
   const [isLoaded, setIsLoaded] = useState(false);
   const [runningTaskId, setRunningTaskId] = useState(null);
+  const [now, setNow] = useState(Date.now());
   const [todoForm, setTodoForm] = useState({
     title: "",
     detail: "",
@@ -134,22 +141,14 @@ export default function StudyPlanner() {
   }, [selectedDate]);
 
   useEffect(() => {
+    const activeTask = state.tasks.find((task) => task.status === "active");
+    setRunningTaskId(activeTask?.id || null);
+  }, [state.tasks]);
+
+  useEffect(() => {
     if (!runningTaskId) return;
     const interval = setInterval(() => {
-      setState((current) => ({
-        ...current,
-        tasks: current.tasks.map((task) =>
-          task.id === runningTaskId
-            ? {
-                ...task,
-                achievedSeconds: task.achievedSeconds + 1,
-                status: task.status === "done" ? "done" : "active",
-              }
-            : task.status === "active"
-              ? { ...task, status: "planned" }
-              : task,
-        ),
-      }));
+      setNow(Date.now());
     }, 1000);
     return () => clearInterval(interval);
   }, [runningTaskId]);
@@ -165,7 +164,7 @@ export default function StudyPlanner() {
       0,
     );
     const achievedSeconds = todaysTasks.reduce(
-      (sum, task) => sum + Number(task.achievedSeconds || 0),
+      (sum, task) => sum + taskElapsedSeconds(task, now),
       0,
     );
     const done = todaysTasks.filter((task) => task.status === "done").length;
@@ -179,34 +178,51 @@ export default function StudyPlanner() {
         ? Math.min(160, Math.round((achievedSeconds / 60 / planned) * 100))
         : 0,
     };
-  }, [todaysTasks]);
+  }, [now, todaysTasks]);
 
   function startTask(taskId) {
-    setRunningTaskId(taskId);
+    const startedAt = Date.now();
     setState((current) => ({
       ...current,
       tasks: current.tasks.map((task) =>
         task.id === taskId
-          ? { ...task, status: "active" }
+          ? {
+              ...task,
+              status: "active",
+              activeStartedAt: task.status === "active" && task.activeStartedAt
+                ? task.activeStartedAt
+                : startedAt,
+            }
           : task.status === "active"
-            ? { ...task, status: "planned" }
+            ? {
+                ...task,
+                status: "planned",
+                achievedSeconds: taskElapsedSeconds(task, startedAt),
+                activeStartedAt: null,
+              }
             : task,
       ),
     }));
   }
 
   function pauseTask() {
+    const pausedAt = Date.now();
     setState((current) => ({
       ...current,
       tasks: current.tasks.map((task) =>
-        task.id === runningTaskId ? { ...task, status: "planned" } : task,
+        task.id === runningTaskId
+          ? {
+              ...task,
+              status: "planned",
+              achievedSeconds: taskElapsedSeconds(task, pausedAt),
+              activeStartedAt: null,
+            }
+          : task,
       ),
     }));
-    setRunningTaskId(null);
   }
 
   function completeTimedTask(taskId) {
-    if (taskId === runningTaskId) setRunningTaskId(null);
     setState((current) => {
       const task = current.tasks.find((item) => item.id === taskId);
       return {
@@ -292,6 +308,7 @@ export default function StudyPlanner() {
           title: todo.title,
           plannedMinutes: Number(todo.plannedMinutes),
           achievedSeconds: 0,
+          activeStartedAt: null,
           status: "planned",
           category: "To-Do",
           sourceTodoId: todo.id,
@@ -489,6 +506,7 @@ export default function StudyPlanner() {
           title: item.title,
           plannedMinutes: item.minutes,
           achievedSeconds: 0,
+          activeStartedAt: null,
           status: "planned",
           category: "Prep",
           notes: `Level: ${topicLevel(item)}`,
@@ -538,6 +556,7 @@ export default function StudyPlanner() {
           tasks={todaysTasks}
           selectedDate={selectedDate}
           metrics={metrics}
+          now={now}
           runningTaskId={runningTaskId}
           startTask={startTask}
           pauseTask={pauseTask}
@@ -582,6 +601,7 @@ function TodayView(props) {
     tasks,
     selectedDate,
     metrics,
+    now,
     runningTaskId,
     startTask,
     pauseTask,
@@ -643,37 +663,39 @@ function TodayView(props) {
           {tasks.length === 0 ? (
             <EmptyState title="No timed tasks yet" text="Add the first task and start the clock when you begin." />
           ) : (
-            tasks.map((task) => (
-              <article className={`task-card ${task.status}`} key={task.id}>
-                <div className="task-head">
-                  <div>
-                    <span className="category-pill">{task.category}</span>
-                    <h3>{task.title}</h3>
-                    {task.notes && <p>{task.notes}</p>}
+            tasks.map((task) => {
+              const elapsedSeconds = taskElapsedSeconds(task, now);
+              const progress = task.plannedMinutes
+                ? Math.min(100, (elapsedSeconds / 60 / task.plannedMinutes) * 100)
+                : 0;
+              return (
+                <article className={`task-card ${task.status}`} key={task.id}>
+                  <div className="task-head">
+                    <div>
+                      <span className="category-pill">{task.category}</span>
+                      <h3>{task.title}</h3>
+                      {task.notes && <p>{task.notes}</p>}
+                    </div>
+                    <div className="timer-readout">{formatSeconds(elapsedSeconds)}</div>
                   </div>
-                  <div className="timer-readout">{formatSeconds(task.achievedSeconds)}</div>
-                </div>
-                <div className="progress-line">
-                  <span
-                    style={{
-                      width: `${Math.min(100, (task.achievedSeconds / 60 / task.plannedMinutes) * 100)}%`,
-                    }}
-                  />
-                </div>
-                <div className="task-meta">
-                  <span>Planned {formatMinutes(task.plannedMinutes)}</span>
-                  <span className={`status-text ${task.status}`}>{task.status}</span>
-                </div>
-                <div className="task-actions">
-                  {runningTaskId === task.id ? (
-                    <IconButton label="Pause" onClick={pauseTask} icon={Pause} />
-                  ) : (
-                    <IconButton label="Start" onClick={() => startTask(task.id)} icon={Play} tone="timer" />
-                  )}
-                  <IconButton label="Done" onClick={() => completeTimedTask(task.id)} icon={Check} tone="timer" />
-                </div>
-              </article>
-            ))
+                  <div className="progress-line">
+                    <span style={{ width: `${progress}%` }} />
+                  </div>
+                  <div className="task-meta">
+                    <span>Planned {formatMinutes(task.plannedMinutes)}</span>
+                    <span className={`status-text ${task.status}`}>{task.status}</span>
+                  </div>
+                  <div className="task-actions">
+                    {runningTaskId === task.id ? (
+                      <IconButton label="Pause" onClick={pauseTask} icon={Pause} />
+                    ) : (
+                      <IconButton label="Start" onClick={() => startTask(task.id)} icon={Play} tone="timer" />
+                    )}
+                    <IconButton label="Done" onClick={() => completeTimedTask(task.id)} icon={Check} tone="timer" />
+                  </div>
+                </article>
+              );
+            })
           )}
         </div>
       </div>
