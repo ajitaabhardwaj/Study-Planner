@@ -35,6 +35,7 @@ const emptyPrepTopic = () => ({
   level: "medium",
   duration: 1,
   durationUnit: "hours",
+  splitDays: 1,
 });
 
 const emptyPrepDayItem = () => ({
@@ -325,6 +326,7 @@ export default function StudyPlanner() {
           title: topic.title.trim(),
           level: topic.level,
           minutes: durationUnit === "minutes" ? durationValue : durationValue * 60,
+          splitDays: Math.max(1, Math.floor(Number(topic.splitDays) || 1)),
           done: false,
           order: index,
         };
@@ -363,6 +365,32 @@ export default function StudyPlanner() {
     };
 
     topics.forEach((topic) => {
+      const requestedSplitDays = Math.min(days, topic.splitDays || 1);
+
+      if (requestedSplitDays > 1) {
+        const baseMinutes = Math.floor(topic.minutes / requestedSplitDays);
+        let remainder = topic.minutes % requestedSplitDays;
+
+        for (let index = 0; index < requestedSplitDays; index += 1) {
+          const chunkMinutes = baseMinutes + (remainder > 0 ? 1 : 0);
+          remainder -= remainder > 0 ? 1 : 0;
+          const preferredDay = plan[index];
+          const splitItem = {
+            ...topic,
+            id: uid(),
+            title: `${topic.title} - day ${index + 1}/${requestedSplitDays}`,
+            minutes: chunkMinutes,
+          };
+
+          if (usedForDay(preferredDay) + chunkMinutes <= dailyCapacity) {
+            preferredDay.items.push(splitItem);
+          } else {
+            addToBestDay(splitItem);
+          }
+        }
+        return;
+      }
+
       let remaining = topic.minutes;
       let part = 1;
       while (remaining > 0) {
@@ -733,6 +761,7 @@ function PrepView({
               <span>Level</span>
               <span>Duration</span>
               <span>Unit</span>
+              <span>Days</span>
               <span />
             </div>
             {prepForm.topics.map((topic) => (
@@ -768,6 +797,14 @@ function PrepView({
                   <option value="hours">Hours</option>
                   <option value="minutes">Minutes</option>
                 </select>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={topic.splitDays || 1}
+                  onChange={(e) => updateTopic(topic.id, { splitDays: e.target.value })}
+                  aria-label="Days to complete"
+                />
                 <IconButton label="Remove" onClick={() => removeTopicRow(topic.id)} icon={Trash2} danger />
               </div>
             ))}
@@ -785,7 +822,7 @@ function PrepView({
 
       <div className="plan-board">
         {prepPlan.length === 0 ? (
-          <EmptyState title="No generated plan yet" text="Add topics with level, duration, and unit, then build the plan." />
+          <EmptyState title="No generated plan yet" text="Add topics with level, duration, unit, and split days, then build the plan." />
         ) : (
           prepPlan.map((day) => {
             const used = day.items.reduce((sum, item) => sum + item.minutes, 0);

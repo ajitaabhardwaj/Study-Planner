@@ -569,7 +569,7 @@ select:focus {
 
 .topic-row {
   display: grid;
-  grid-template-columns: 92px 86px 104px 42px;
+  grid-template-columns: 86px 76px 96px 78px 42px;
   gap: 8px;
   align-items: center;
 }
@@ -962,7 +962,11 @@ select:focus {
   }
 
   .topic-row select[aria-label="Time unit"] {
-    grid-column: span 2;
+    grid-column: span 1;
+  }
+
+  .topic-row input[aria-label="Days to complete"] {
+    grid-column: span 1;
   }
 
   .topic-row-head {
