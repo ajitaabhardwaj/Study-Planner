@@ -739,7 +739,14 @@ select:focus {
   min-width: 0;
 }
 
-.prep-plan-button {
+.prep-item-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.prep-plan-button,
+.prep-delete-button {
   display: inline-grid;
   place-items: center;
   flex: 0 0 auto;
@@ -749,6 +756,11 @@ select:focus {
   border-radius: 999px;
   background: rgba(59, 130, 246, 0.18);
   color: #2563eb;
+}
+
+.prep-delete-button {
+  background: rgba(210, 31, 60, 0.18);
+  color: #d21f3c;
 }
 
 .muted {

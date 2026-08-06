@@ -414,6 +414,16 @@ export default function StudyPlanner() {
     }));
   }
 
+  function deletePrepItem(itemId) {
+    setState((current) => ({
+      ...current,
+      prepPlan: current.prepPlan.map((day) => ({
+        ...day,
+        items: day.items.filter((item) => item.id !== itemId),
+      })),
+    }));
+  }
+
   function addPrepItemToDay(dayId, item) {
     const durationValue = Math.max(1, Math.floor(Number(item.duration) || 1));
     const minutes = item.durationUnit === "minutes" ? durationValue : durationValue * 60;
@@ -525,6 +535,7 @@ export default function StudyPlanner() {
           prepPlan={state.prepPlan}
           prepItemToTask={prepItemToTask}
           updatePrepItemDone={updatePrepItemDone}
+          deletePrepItem={deletePrepItem}
           addPrepItemToDay={addPrepItemToDay}
         />
       )}
@@ -652,6 +663,7 @@ function PrepView({
   prepPlan,
   prepItemToTask,
   updatePrepItemDone,
+  deletePrepItem,
   addPrepItemToDay,
 }) {
   const [dayItemForms, setDayItemForms] = useState({});
@@ -826,9 +838,14 @@ function PrepView({
                           <small>{prepItemMeta(item)}</small>
                         </span>
                       </label>
-                      <button className="prep-plan-button" type="button" onClick={() => prepItemToTask(item)} title="Add to today" aria-label="Add to today">
-                        <ArrowRight size={17} />
-                      </button>
+                      <div className="prep-item-actions">
+                        <button className="prep-plan-button" type="button" onClick={() => prepItemToTask(item)} title="Add to today" aria-label="Add to today">
+                          <ArrowRight size={17} />
+                        </button>
+                        <button className="prep-delete-button" type="button" onClick={() => deletePrepItem(item.id)} title="Delete item" aria-label={`Delete ${item.title}`}>
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
